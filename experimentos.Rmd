@@ -9,7 +9,13 @@ library(readxl)
 base_aguacates <- read_excel("C:/Users/User/Downloads/base.aguacates.xlsx")
 ```
 
-
+```{r}
+base_aguacates$temp=as.factor(base_aguacates$temp)
+levels(base_aguacates$temp)=c("ambiente","refrigeradora","congelador") 
+base_aguacates$semilla=factor(base_aguacates$semilla) 
+levels(base_aguacates$semilla)=c("con semilla","sin semilla")
+base_aguacates
+```
 
 $$
 \mu_{ijk} = \mu + \alpha_i+\beta_j+(\alpha\beta)_{ij}+\delta_k\\
