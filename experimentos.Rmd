@@ -1,0 +1,15 @@
+---
+title: "Proyecto Experimentos"
+output: html_document
+date: "2025-06-21"
+---
+
+$$
+\mu_{ijk} = \mu + \alpha_i+\beta_j+(\alpha\beta)_{ij}+\delta_k\\
+$$
+$$
+\mu_{ijk} = \mu + \alpha_1 T_1 + \alpha_2 T_2 + \beta_1 C_1 + (\alpha\beta)_{11} T_1 C_1 + (\alpha\beta)_{21} T_2 C_1 + \delta_k
+$$
+
+
+
