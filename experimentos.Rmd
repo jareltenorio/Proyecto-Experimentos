@@ -17,6 +17,36 @@ levels(base_aguacates$semilla)=c("con semilla","sin semilla")
 base_aguacates
 ```
 
+número de repeticiones por tratamiento.
+```{r}
+table(base_aguacates$temp,base_aguacates$semilla)
+```
+
+ggplot de interacción
+```{r}
+library(ggplot2)
+ggplot(base_aguacates,aes(x=semilla,y=oxidación, group= temp))+
+  stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))
+```
+paso a suma nula y modelo
+```{r}
+options(contrasts = c("contr.sum","contr.poly"))
+mod= lm(oxidación~temp*semilla, data=base_aguacates)
+mod
+```
+```{r}
+anova(mod)
+```
+
+
+
+
+
+
+
+
+
+
 $$
 \mu_{ijk} = \mu + \alpha_i+\beta_j+(\alpha\beta)_{ij}+\delta_k\\
 $$
