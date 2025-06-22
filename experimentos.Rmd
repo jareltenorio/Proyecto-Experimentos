@@ -6,7 +6,7 @@ date: "2025-06-21"
 
 ```{r}
 library(readxl)
-base_aguacates <- read_excel("C:/Users/User/Downloads/base.aguacates.xlsx")
+base_aguacates <- read_excel("C:/Users/XPC/Downloads/base.aguacates.xlsx")
 ```
 
 ```{r}
@@ -14,13 +14,15 @@ base_aguacates$temp=as.factor(base_aguacates$temp)
 levels(base_aguacates$temp)=c("ambiente","refrigeradora","congelador") 
 base_aguacates$semilla=factor(base_aguacates$semilla) 
 levels(base_aguacates$semilla)=c("con semilla","sin semilla")
-base_aguacates
+attach(base_aguacates)
 ```
+
 
 número de repeticiones por tratamiento.
 ```{r}
 table(base_aguacates$temp,base_aguacates$semilla)
 ```
+
 
 ggplot de interacción
 ```{r}
@@ -39,7 +41,9 @@ anova(mod)
 ```
 
 
-
+```{r}
+boxplot(oxidación~temp+semilla, ylab = "Nivel de Oxidación", xlab = "Temperatura : Semilla", data = base_aguacates)
+```
 
 
 
