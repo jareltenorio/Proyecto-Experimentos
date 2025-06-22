@@ -9,11 +9,13 @@ library(readxl)
 base_aguacates <- read_excel("C:/Users/XPC/Downloads/base.aguacates.xlsx")
 ```
 
+
 ```{r}
 base_aguacates$temp=as.factor(base_aguacates$temp)
 levels(base_aguacates$temp)=c("ambiente","refrigeradora","congelador") 
 base_aguacates$semilla=factor(base_aguacates$semilla) 
 levels(base_aguacates$semilla)=c("con semilla","sin semilla")
+base_aguacates$bloque = as.factor(base_aguacates$bloque)
 attach(base_aguacates)
 ```
 
@@ -30,12 +32,15 @@ library(ggplot2)
 ggplot(base_aguacates,aes(x=semilla,y=oxidación, group= temp))+
   stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))
 ```
+
+
 paso a suma nula y modelo
 ```{r}
 options(contrasts = c("contr.sum","contr.poly"))
-mod= lm(oxidación~temp*semilla, data=base_aguacates)
-mod
+mod= lm(oxidación~temp*semilla+bloque, data=base_aguacates)
 ```
+
+
 ```{r}
 anova(mod)
 ```
@@ -44,11 +49,6 @@ anova(mod)
 ```{r}
 boxplot(oxidación~temp+semilla, ylab = "Nivel de Oxidación", xlab = "Temperatura : Semilla", data = base_aguacates)
 ```
-
-
-
-
-
 
 
 $$
