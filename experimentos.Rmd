@@ -25,7 +25,7 @@ número de repeticiones por tratamiento.
 ```{r}
 table(base_aguacates$temp,base_aguacates$semilla)
 ```
-*comparación de los gráficos*
+*comparación de los gráficos Bloques*
 
 ```{r}
 modprueba=lm(oxidación~bloque,data=base_aguacates) #fijo respuesta y bloque
@@ -50,8 +50,8 @@ $$
 $$
 \mu_{ijk} = \mu + \alpha_1 T_1 + \alpha_2 T_2 + \beta_1 C_1 + (\alpha\beta)_{11} T_1 C_1 + (\alpha\beta)_{21} T_2 C_1 + \delta_k
 $$
-#Prueba de normalidad
-uso el mod
+#Prueba de normalidad (Ayuda de la profe)
+
 
 
 
@@ -118,5 +118,15 @@ M
 
 #necesitamos un diferencia mínima relevante (preguntar al experto)
 ```
+#La diferencia relevante dada por el experto es de 0.26 en este caso es más
 #me puedo pasar al modelo sin interacción
+
+```{r}
+mod1= lm(oxidación~temp+semilla+bloque, data=base_aguacates)
+anova(mod1)
+```
+
+
+
+
 
