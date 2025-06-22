@@ -6,7 +6,6 @@ date: "2025-06-21"
 
 ```{r}
 library(readxl)
-base_aguacates <- read_excel("C:/Users/XPC/Downloads/base.aguacates.xlsx")
 ```
 
 
@@ -16,6 +15,8 @@ levels(base_aguacates$temp)=c("ambiente","refrigeradora","congelador")
 base_aguacates$semilla=factor(base_aguacates$semilla) 
 levels(base_aguacates$semilla)=c("con semilla","sin semilla")
 base_aguacates$bloque = as.factor(base_aguacates$bloque)
+levels(base_aguacates$bloque)=c("g","m","j","a")
+base_aguacates$bloque = as.factor(base_aguacates$bloque)
 attach(base_aguacates)
 ```
 
@@ -24,40 +25,8 @@ número de repeticiones por tratamiento.
 ```{r}
 table(base_aguacates$temp,base_aguacates$semilla)
 ```
+*comparación de los gráficos*
 
-
-ggplot de interacción
-```{r}
-library(ggplot2)
-ggplot(base_aguacates,aes(x=semilla,y=oxidación, group= temp))+
-  stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))
-```
-
-
-paso a suma nula y modelo
-```{r}
-options(contrasts = c("contr.sum","contr.poly"))
-mod= lm(oxidación~temp*semilla+bloque, data=base_aguacates)
-```
-
-
-```{r}
-anova(mod)
-```
-
-
-```{r}
-boxplot(oxidación~temp+semilla, ylab = "Nivel de Oxidación", xlab = "Temperatura : Semilla", data = base_aguacates)
-```
-
-
-$$
-\mu_{ijk} = \mu + \alpha_i+\beta_j+(\alpha\beta)_{ij}+\delta_k\\
-$$
-$$
-\mu_{ijk} = \mu + \alpha_1 T_1 + \alpha_2 T_2 + \beta_1 C_1 + (\alpha\beta)_{11} T_1 C_1 + (\alpha\beta)_{21} T_2 C_1 + \delta_k
-$$
-#prueba
 ```{r}
 modprueba=lm(oxidación~bloque,data=base_aguacates) #fijo respuesta y bloque
 pre=predict(modprueba)  #me da la media de cada bloque
@@ -66,8 +35,88 @@ t1=base_aguacates$oxidación-pre+mean(base_aguacates$oxidación)
 
 ```{r}
 par(mfrow=c(1,2))
-boxplot(oxidación~temp,ylim=c(0,6),xlab="temp",ylab="oxidación",data=base_aguacates)
-boxplot(t1~temp,ylim=c(0,6),xlab="temp",
+boxplot(oxidación~temp+semilla,ylim=c(0,6),xlab="temp",ylab="oxidación",data=base_aguacates)
+boxplot(t1~temp+semilla,ylim=c(0,6),xlab="temp",
 ylab="oxidacion centrada",data=base_aguacates)
 ```
+
+*verificación de los supuestos (normalidad, homocedasticidad)*
+si me dan normales o homocedasticos no debo de hacer ninguna correccion(bonfe, tuckey, etc)
+
+$$
+\mu_{ijk} = \mu + \alpha_i+\beta_j+(\alpha\beta)_{ij}+\delta_k\\
+$$
+
+$$
+\mu_{ijk} = \mu + \alpha_1 T_1 + \alpha_2 T_2 + \beta_1 C_1 + (\alpha\beta)_{11} T_1 C_1 + (\alpha\beta)_{21} T_2 C_1 + \delta_k
+$$
+#Prueba de normalidad
+uso el mod
+
+
+
+#Prueba de homocedasticidad
+H0: hay homocedasticidad
+
+```{r}
+bartlett.test(residuals(mod)~interaction(temp,semilla),data=base_aguacates)
+```
+Sí hay homocedasticidad (no hay corrección)
+
+
+*Verificación de la interacción*
+
+ggplot de interacción
+```{r}
+library(ggplot2)
+ggplot(base_aguacates,aes(x=semilla,y=oxidación, group= temp))+
+  stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))
+```
+se espera qe haya interaccción
+
+paso a suma nula y modelo
+
+H0: (aB)=0
+
+```{r}
+options(contrasts = c("contr.sum","contr.poly"))
+mod= lm(oxidación~temp*semilla+bloque, data=base_aguacates)
+anova(mod)
+```
+#queda claro que no hay interacción pero igual lo pruebo con la comparacion de medias obvservadas y estimadas
+
+```{r}
+model.tables(aov(mod)) #efectos de interacción
+```
+```{r}
+mediagen <- mean(base_aguacates$oxidación)#media general de oxidación
+mediaobv <- tapply(base_aguacates$oxidación,list(base_aguacates$temp,base_aguacates$semilla),mean)#medias observadas y estimadas
+
+alfa= tapply(base_aguacates$oxidación,base_aguacates$temp,mean)-mediagen
+alfa
+
+beta=tapply(base_aguacates$oxidación,base_aguacates$semilla,mean)-mediagen
+beta
+
+#mediaest= media general+a+B 
+  
+m11= mediagen+alfa[1]+beta[1] 
+m21= mediagen+alfa[2]+beta[1]
+m31= mediagen+alfa[3]+beta[1]
+m12= mediagen+alfa[1]+beta[2]
+m22= mediagen+alfa[2]+beta[2]
+m32= mediagen+alfa[3]+beta[2]
+  
+mest= c(m11,m21,m31,m12,m22,m32)
+mest
+```
+```{r}
+#comparación
+M=cbind(as.vector(mediaobv),mest)
+colnames(M)= c("Observados","   Estimados sin interacción")
+M
+
+#necesitamos un diferencia mínima relevante (preguntar al experto)
+```
+#me puedo pasar al modelo sin interacción
 
