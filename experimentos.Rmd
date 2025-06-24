@@ -8,6 +8,7 @@ date: "2025-06-21"
 library(readxl)
 ```
 
+#factor
 
 ```{r}
 base_aguacates$temp=as.factor(base_aguacates$temp)
@@ -17,16 +18,18 @@ levels(base_aguacates$semilla)=c("con semilla","sin semilla")
 base_aguacates$bloque = as.factor(base_aguacates$bloque)
 levels(base_aguacates$bloque)=c("g","m","j","a")
 base_aguacates$bloque = as.factor(base_aguacates$bloque)
-attach(base_aguacates)
+
 ```
 
 
-número de repeticiones por tratamiento.
+#número de repeticiones por tratamiento.
+
 ```{r}
 table(base_aguacates$temp,base_aguacates$semilla)
 ```
-*comparación de los gráficos Bloques*
 
+
+*comparación de los gráficos Bloques*
 ```{r}
 modprueba=lm(oxidación~bloque,data=base_aguacates) #fijo respuesta y bloque
 pre=predict(modprueba)  #me da la media de cada bloque
@@ -50,13 +53,27 @@ $$
 $$
 \mu_{ijk} = \mu + \alpha_1 T_1 + \alpha_2 T_2 + \beta_1 C_1 + (\alpha\beta)_{11} T_1 C_1 + (\alpha\beta)_{21} T_2 C_1 + \delta_k
 $$
-#Prueba de normalidad (Ayuda de la profe)
+
+*Prueba de normalidad*
+
+```{r}
+car::qqPlot(mod1$res)
+shapiro.test(mod1$res)
+ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
+```
+
+Verificamos que sí hay normalidad tanto con la prueba de ks y con la shapiro
+
+*intervalos de confianza necesario la diferencia relevante*
+```{r}
+TukeyHSD(aov(mod1))
+plot(TukeyHSD(aov(mod1)))
+
+```
 
 
-
-
-#Prueba de homocedasticidad
-H0: hay homocedasticidad
+*Prueba de homocedasticidad*
+H0: hay homocedasticidad   H1: no hay homocedasticidad
 
 ```{r}
 bartlett.test(residuals(mod)~interaction(temp,semilla),data=base_aguacates)
@@ -76,7 +93,7 @@ se espera qe haya interaccción
 
 paso a suma nula y modelo
 
-H0: (aB)=0
+H0: (aB)ij=0
 
 ```{r}
 options(contrasts = c("contr.sum","contr.poly"))
@@ -84,6 +101,9 @@ mod= lm(oxidación~temp*semilla+bloque, data=base_aguacates)
 anova(mod)
 ```
 #queda claro que no hay interacción pero igual lo pruebo con la comparacion de medias obvservadas y estimadas
+
+# Solo interesa probar en esta etapa si existe interacción entre temperatura y semilla. No interesa probar los efectos simples si no se ha eliminado la interacción. La hipótesis es H0 : (αβ)ij = 0. Esta hipótesis dice que el efecto de la temperatura del aguacate sobre la oxidación  promedio es independiente de si hay semilla o no, es decir, es el mismo sin importar la presencia de semilla o falta de esta.
+
 
 ```{r}
 model.tables(aov(mod)) #efectos de interacción
@@ -118,12 +138,21 @@ M
 
 #necesitamos un diferencia mínima relevante (preguntar al experto)
 ```
-#La diferencia relevante dada por el experto es de 0.26 en este caso es más
+
+#Preguntar la diferencia relevante (que pasa si es de 2, caso hipotético)
 #me puedo pasar al modelo sin interacción
+
 
 ```{r}
 mod1= lm(oxidación~temp+semilla+bloque, data=base_aguacates)
 anova(mod1)
+
+#la varianza entre bloque es de 9,667 (por lo que no hay muchas diferencias de entre bloques)
+```
+
+
+```{r}
+bartlett.test(oxidación~interaction(temp,semilla),data=base_aguacates)
 ```
 
 
