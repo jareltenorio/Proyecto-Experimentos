@@ -187,3 +187,10 @@ plot(TukeyHSD(aov(mod1)))
 Podemos usar los intervalos dados por la prueba de tukey (necesitamos la diferencia significativa o relevante)
 
 
+
+# Potencia
+```{r}
+library(pwr)
+power.anova.test(n= 12, groups = 6, between.var = 32.812, within.var = 0.643)
+```
+
