@@ -73,8 +73,8 @@ plot(TukeyHSD(aov(mod1)))
 
 
 *Prueba de homocedasticidad*
-H0: hay homocedasticidad   H1: no hay homocedasticidad
 
+H0: hay homocedasticidad   H1: no hay homocedasticidad
 ```{r}
 bartlett.test(residuals(mod)~interaction(temp,semilla),data=base_aguacates)
 ```
@@ -82,27 +82,26 @@ Sí hay homocedasticidad (no hay corrección)
 
 
 *Verificación de la interacción*
-
 ggplot de interacción
 ```{r}
 library(ggplot2)
 ggplot(base_aguacates,aes(x=semilla,y=oxidación, group= temp))+
   stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))
 ```
-se espera qe haya interaccción
 
 paso a suma nula y modelo
 
-H0: (aB)ij=0
+*Prueba de interacción*
 
+H0: (aB)ij=0  H1: (aB)ij!=0
 ```{r}
 options(contrasts = c("contr.sum","contr.poly"))
 mod= lm(oxidación~temp*semilla+bloque, data=base_aguacates)
 anova(mod)
 ```
-#queda claro que no hay interacción pero igual lo pruebo con la comparacion de medias obvservadas y estimadas
 
-# Solo interesa probar en esta etapa si existe interacción entre temperatura y semilla. No interesa probar los efectos simples si no se ha eliminado la interacción. La hipótesis es H0 : (αβ)ij = 0. Esta hipótesis dice que el efecto de la temperatura del aguacate sobre la oxidación  promedio es independiente de si hay semilla o no, es decir, es el mismo sin importar la presencia de semilla o falta de esta.
+No hay interacción pero igual lo pruebo con la comparacion de medias obvservadas y estimadas
+Solo interesa probar en esta etapa si existe interacción entre temperatura y semilla. No interesa probar los efectos simples si no se ha eliminado la interacción. La hipótesis es H0:(αβ)ij = 0. Esta hipótesis dice que el efecto de la temperatura del aguacate sobre la oxidación  promedio es independiente de si hay semilla o no, es decir, es el mismo sin importar la presencia de semilla o falta de esta.
 
 
 ```{r}
@@ -138,11 +137,15 @@ M
 
 #necesitamos un diferencia mínima relevante (preguntar al experto)
 ```
+Sigo corroborando que no hay interacción
 
-#Preguntar la diferencia relevante (que pasa si es de 2, caso hipotético)
-#me puedo pasar al modelo sin interacción
+____________________________________________________________________________________________
 
+*me puedo pasar al modelo sin interacción*
 
+#vuelvo a realizar las pruebas
+
+#modelo sin interacción y bloque
 ```{r}
 mod1= lm(oxidación~temp+semilla+bloque, data=base_aguacates)
 anova(mod1)
@@ -150,12 +153,37 @@ anova(mod1)
 #la varianza entre bloque es de 9,667 (por lo que no hay muchas diferencias de entre bloques)
 ```
 
+#Homocedasticidad DUDA HAY 2
 
 ```{r}
 bartlett.test(oxidación~interaction(temp,semilla),data=base_aguacates)
 ```
 
+#Prueba de homocedasticidad
 
+H0: hay homocedasticidad   H1: no hay homocedasticidad
+```{r}
+bartlett.test(residuals(mod1)~interaction(temp,semilla),data=base_aguacates)
+```
+Hay homocedasticidad
 
+#Prueba de normalidad
+
+```{r}
+car::qqPlot(mod1$res)
+shapiro.test(mod1$res)
+ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
+```
+
+#intervalos de confianza necesario la diferencia relevante
+
+```{r}
+TukeyHSD(aov(mod1))
+```
+```{r}
+plot(TukeyHSD(aov(mod1)))
+```
+
+Podemos usar los intervalos dados por la prueba de tukey (necesitamos la diferencia significativa o relevante)
 
 
