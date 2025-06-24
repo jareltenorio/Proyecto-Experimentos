@@ -193,56 +193,59 @@ library(pwr)
 power.anova.test(n= 12, groups = 6, between.var = 32.812, within.var = 0.643)
 ```
 
+
+
+
+
 # prueba de potencia
  
 Promedios muestrales
 ```{r}
-tapply(base$tiempo,base$glicerina,mean)
+medias <- tapply(base_aguacates$oxidación,list(base_aguacates$temp,base_aguacates$semilla),mean)
 ```
 
 CMRes
 ```{r}
-ase1$glicerina=factor(base1$glicerina)
- base1$persona=factor(base1$persona)
- mod1=lm(tiempo~glicerina+persona,data=base1)
- (cmres=anova(mod1)[3,3])
+cmres <- anova(mod1)[4,3]
 ```
 
 #Preparación para simulación
 
 Variable X:
 ```{r}
-(X = factor(rep(1:2,each=6)))
+X = factor(rep(1:12,each=4))
 ```
+
 
 Vector de promedios:
 ```{r}
-(muj = rep(c(7,9),each=6))
+muj = rep(medias,each=12)
 ```
 
 Variable Y original:
 ```{r}
- s = sqrt(cmres)
- n = 2*6
- (Y1 = rnorm(n,muj,s))
+s = sqrt(cmres)
+n = 48
+Y1 = rnorm(n,muj,s)
 ```
 
 Variable de bloques:
 ```{r}
-(B=factor(rep(1:6,2)))
+B=factor(rep(1:4,12))
+B
 ```
 
 Vectorde efectos de bloques:
 ```{r}
-vb=3
+vb <- anova(mod1)[3,2]
 sb=sqrt(vb)
-eb=rnorm(6,0,sb)
-(efb=rep(eb,2))
+eb=rnorm(6,0,sb) # Revisar
+efb=rep(eb,2) # Revisar
 ```
 
 VariableYfinal:
 ```{r}
- (Y=Y1+efb)
+Y=Y1+efb
 ```
 
 #Función para calcular la potencia
@@ -269,7 +272,7 @@ Función:
 
 Potencia:
 ```{r}
- mu=c(7,10)
+ mu=c(7,10) # Quedamaos aqui
  v=6.5
  vb=10
  b=3:20
