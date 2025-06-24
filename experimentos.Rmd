@@ -187,10 +187,109 @@ plot(TukeyHSD(aov(mod1)))
 Podemos usar los intervalos dados por la prueba de tukey (necesitamos la diferencia significativa o relevante)
 
 
-
 # Potencia
 ```{r}
 library(pwr)
 power.anova.test(n= 12, groups = 6, between.var = 32.812, within.var = 0.643)
 ```
+
+# prueba de potencia
+ 
+Promedios muestrales
+```{r}
+tapply(base$tiempo,base$glicerina,mean)
+```
+
+CMRes
+```{r}
+ase1$glicerina=factor(base1$glicerina)
+ base1$persona=factor(base1$persona)
+ mod1=lm(tiempo~glicerina+persona,data=base1)
+ (cmres=anova(mod1)[3,3])
+```
+
+#Preparación para simulación
+
+Variable X:
+```{r}
+(X = factor(rep(1:2,each=6)))
+```
+
+Vector de promedios:
+```{r}
+(muj = rep(c(7,9),each=6))
+```
+
+Variable Y original:
+```{r}
+ s = sqrt(cmres)
+ n = 2*6
+ (Y1 = rnorm(n,muj,s))
+```
+
+Variable de bloques:
+```{r}
+(B=factor(rep(1:6,2)))
+```
+
+Vectorde efectos de bloques:
+```{r}
+vb=3
+sb=sqrt(vb)
+eb=rnorm(6,0,sb)
+(efb=rep(eb,2))
+```
+
+VariableYfinal:
+```{r}
+ (Y=Y1+efb)
+```
+
+#Función para calcular la potencia
+
+Función:
+```{r}
+ fun2=function(b,mu,v,vb){
+ k=length(mu)
+ n=b*k
+ X=factor(rep(1:k,each=b))
+ muj=rep(mu,each=b)
+ s =sqrt(v)
+ Y1=rnorm(n,muj,s)
+ B=factor(rep(1:b,k))
+ sb=sqrt(vb)
+ eb=rnorm(b,0,sb)
+ efb=rep(eb,k)
+ Y=Y1+efb
+ mod=aov(Y~X+B )
+ p=anova(mod)[1,5]
+ return(p)
+ }
+```
+
+Potencia:
+```{r}
+ mu=c(7,10)
+ v=6.5
+ vb=10
+ b=3:20
+ h=length(b)
+ M=1000
+ prob=matrix(nrow=1000,ncol=h)
+ for(jin1:h){
+ for(iin1:M)prob[i,j]=fun2(b[j],mu,v,vb)
+```
+
+```{r}
+(pot=apply(prob<0.05,2,mean))
+```
+
+Gráfico:
+```{r}
+ plot(b,pot,type="l")
+ abline(h=0.9,lty=2)
+ abline(v=17,lty=2)
+```
+
+
 
