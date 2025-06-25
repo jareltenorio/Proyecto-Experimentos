@@ -104,41 +104,6 @@ No hay interacción pero igual lo pruebo con la comparacion de medias obvservada
 Solo interesa probar en esta etapa si existe interacción entre temperatura y semilla. No interesa probar los efectos simples si no se ha eliminado la interacción. La hipótesis es H0:(αβ)ij = 0. Esta hipótesis dice que el efecto de la temperatura del aguacate sobre la oxidación  promedio es independiente de si hay semilla o no, es decir, es el mismo sin importar la presencia de semilla o falta de esta.
 
 
-```{r}
-model.tables(aov(mod)) #efectos de interacción
-```
-```{r}
-mediagen <- mean(base_aguacates$oxidación)#media general de oxidación
-mediaobv <- tapply(base_aguacates$oxidación,list(base_aguacates$temp,base_aguacates$semilla),mean)#medias observadas y estimadas
-
-alfa= tapply(base_aguacates$oxidación,base_aguacates$temp,mean)-mediagen
-alfa
-
-beta=tapply(base_aguacates$oxidación,base_aguacates$semilla,mean)-mediagen
-beta
-
-#mediaest= media general+a+B 
-  
-m11= mediagen+alfa[1]+beta[1] 
-m21= mediagen+alfa[2]+beta[1]
-m31= mediagen+alfa[3]+beta[1]
-m12= mediagen+alfa[1]+beta[2]
-m22= mediagen+alfa[2]+beta[2]
-m32= mediagen+alfa[3]+beta[2]
-  
-mest= c(m11,m21,m31,m12,m22,m32)
-mest
-```
-```{r}
-#comparación
-M=cbind(as.vector(mediaobv),mest)
-colnames(M)= c("Observados","   Estimados sin interacción")
-M
-
-#necesitamos un diferencia mínima relevante (preguntar al experto)
-```
-Sigo corroborando que no hay interacción
-
 ____________________________________________________________________________________________
 
 *me puedo pasar al modelo sin interacción*
@@ -152,6 +117,15 @@ anova(mod1)
 
 #la varianza entre bloque es de 9,667 (por lo que no hay muchas diferencias de entre bloques)
 ```
+*Qué teníamos que hacer con la temperatura o semilla (no recordamos si era con el que se rechazabao con el que no)*
+```{r}
+#comparaciones múltiples
+library(emmeans)
+emmeans(mod1,pairwise~"temp",adjust="tukey")
+
+confint(emmeans(mod1,pairwise~"temp",adjust="tukey"))
+```
+
 
 #Homocedasticidad DUDA HAY 2
 
@@ -167,6 +141,8 @@ bartlett.test(residuals(mod1)~interaction(temp,semilla),data=base_aguacates)
 ```
 Hay homocedasticidad
 
+*Cuál homocedasticidad es la que utilizamos, y por qué hay 2*
+
 #Prueba de normalidad
 
 ```{r}
@@ -180,6 +156,9 @@ ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 ```{r}
 TukeyHSD(aov(mod1))
 ```
+
+*Por qué podíamos usar los intervalos de confianza de tukey (si había que hacerle algo por los valores negativos)*
+
 ```{r}
 plot(TukeyHSD(aov(mod1)))
 ```
@@ -187,6 +166,8 @@ plot(TukeyHSD(aov(mod1)))
 Podemos usar los intervalos dados por la prueba de tukey (necesitamos la diferencia significativa o relevante)
 
 
+
+*NO entendemos potencia con bloques*
 # Potencia
 ```{r}
 library(pwr)
@@ -195,7 +176,7 @@ power.anova.test(n= 12, groups = 6, between.var = 32.812, within.var = 0.643)
 
 
 
-
+*Necesitamos corrección*
 
 # prueba de potencia
  
@@ -295,4 +276,7 @@ Gráfico:
 ```
 
 
+Resultados
+*Qué nos falta aparte de potencia*
 
+*Qué hacemos con lo del modelo mixto*
