@@ -28,46 +28,34 @@ base_aguacates$bloque = as.factor(base_aguacates$bloque)
 table(base_aguacates$temp,base_aguacates$semilla)
 ```
 
-
-*comparación de los gráficos Bloques*
+*modelo partiendo de interacción*
 ```{r}
-modprueba=lm(oxidación~bloque,data=base_aguacates) #fijo respuesta y bloque
-pre=predict(modprueba)  #me da la media de cada bloque
-t1=base_aguacates$oxidación-pre+mean(base_aguacates$oxidación)
+mod= lm(oxidación~temp*semilla+bloque, data=base_aguacates)
 ```
 
-```{r}
-par(mfrow=c(1,2))
-boxplot(oxidación~temp+semilla,ylim=c(0,6),xlab="temp",ylab="oxidación",data=base_aguacates)
-boxplot(t1~temp+semilla,ylim=c(0,6),xlab="temp",
-ylab="oxidacion centrada",data=base_aguacates)
-```
 
 *verificación de los supuestos (normalidad, homocedasticidad)*
 si me dan normales o homocedasticos no debo de hacer ninguna correccion(bonfe, tuckey, etc)
+
 
 $$
 \mu_{ijk} = \mu + \alpha_i+\beta_j+(\alpha\beta)_{ij}+\delta_k\\
 $$
 
-$$
-\mu_{ijk} = \mu + \alpha_1 T_1 + \alpha_2 T_2 + \beta_1 C_1 + (\alpha\beta)_{11} T_1 C_1 + (\alpha\beta)_{21} T_2 C_1 + \delta_k
-$$
-
 *Prueba de normalidad*
 
 ```{r}
-car::qqPlot(mod1$res)
-shapiro.test(mod1$res)
-ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
+car::qqPlot(mod$res)
+shapiro.test(mod$res)
+ks.test(mod$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 ```
 
 Verificamos que sí hay normalidad tanto con la prueba de ks y con la shapiro
 
 *intervalos de confianza necesario la diferencia relevante*
 ```{r}
-TukeyHSD(aov(mod1))
-plot(TukeyHSD(aov(mod1)))
+TukeyHSD(aov(mod))
+plot(TukeyHSD(aov(mod)))
 
 ```
 
@@ -96,7 +84,6 @@ paso a suma nula y modelo
 H0: (aB)ij=0  H1: (aB)ij!=0
 ```{r}
 options(contrasts = c("contr.sum","contr.poly"))
-mod= lm(oxidación~temp*semilla+bloque, data=base_aguacates)
 anova(mod)
 ```
 
@@ -108,6 +95,21 @@ ________________________________________________________________________________
 
 *me puedo pasar al modelo sin interacción*
 
+*comparación de los gráficos Bloques*
+```{r}
+modprueba=lm(oxidación~bloque,data=base_aguacates) #fijo respuesta y bloque
+pre=predict(modprueba)  #me da la media de cada bloque
+t1=base_aguacates$oxidación-pre+mean(base_aguacates$oxidación)
+```
+
+```{r}
+par(mfrow=c(1,2))
+boxplot(oxidación~temp+semilla,ylim=c(0,6),xlab="temp",ylab="oxidación",data=base_aguacates)
+boxplot(t1~temp+semilla,ylim=c(0,6),xlab="temp",
+ylab="oxidacion centrada",data=base_aguacates)
+```
+
+
 #vuelvo a realizar las pruebas
 
 #modelo sin interacción y bloque
@@ -118,30 +120,32 @@ anova(mod1)
 #la varianza entre bloque es de 9,667 (por lo que no hay muchas diferencias de entre bloques)
 ```
 *Qué teníamos que hacer con la temperatura o semilla (no recordamos si era con el que se rechazabao con el que no)*
+
+R/ hicimos la prueba del anova con nuestro modelo sin interaccion y llegamos a la conclusión de que la temperatura sí tiene un efecto sobre el nivel de oxidacion del aguacate, podemos ver en la siguiente parte
+
 ```{r}
 #comparaciones múltiples
 library(emmeans)
-emmeans(mod1,pairwise~"temp",adjust="tukey")
-
-confint(emmeans(mod1,pairwise~"temp",adjust="tukey"))
+em1 <- emmeans(mod1,pairwise~"temp",adjust="tukey")
+confint(em1)
 ```
-
-
-#Homocedasticidad DUDA HAY 2
 
 ```{r}
-bartlett.test(oxidación~interaction(temp,semilla),data=base_aguacates)
+
+plot(em1$emmeans)
+plot(em1$contrasts) #para la diferencia relevante
+
+
 ```
 
-#Prueba de homocedasticidad
+
+#Prueba de homocedasticidad ****** (se quita el efecto del bloque con los residuales)
 
 H0: hay homocedasticidad   H1: no hay homocedasticidad
 ```{r}
 bartlett.test(residuals(mod1)~interaction(temp,semilla),data=base_aguacates)
 ```
 Hay homocedasticidad
-
-*Cuál homocedasticidad es la que utilizamos, y por qué hay 2*
 
 #Prueba de normalidad
 
@@ -150,20 +154,6 @@ car::qqPlot(mod1$res)
 shapiro.test(mod1$res)
 ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 ```
-
-#intervalos de confianza necesario la diferencia relevante
-
-```{r}
-TukeyHSD(aov(mod1))
-```
-
-*Por qué podíamos usar los intervalos de confianza de tukey (si había que hacerle algo por los valores negativos)*
-
-```{r}
-plot(TukeyHSD(aov(mod1)))
-```
-
-Podemos usar los intervalos dados por la prueba de tukey (necesitamos la diferencia significativa o relevante)
 
 
 
