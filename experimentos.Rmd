@@ -6,6 +6,9 @@ date: "2025-06-21"
 
 ```{r}
 library(readxl)
+library(emmeans)
+library(ggplot2)
+library(pwr)
 ```
 
 #factor
@@ -72,7 +75,6 @@ Sí hay homocedasticidad (no hay corrección)
 *Verificación de la interacción*
 ggplot de interacción
 ```{r}
-library(ggplot2)
 ggplot(base_aguacates,aes(x=semilla,y=oxidación, group= temp))+
   stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))
 ```
@@ -125,18 +127,16 @@ R/ hicimos la prueba del anova con nuestro modelo sin interaccion y llegamos a l
 
 ```{r}
 #comparaciones múltiples
-library(emmeans)
 em1 <- emmeans(mod1,pairwise~"temp",adjust="tukey")
 confint(em1)
 ```
 
 ```{r}
-
 plot(em1$emmeans)
-plot(em1$contrasts) #para la diferencia relevante
-
-
+p <- plot(em1$contrasts) #para la diferencia relevante
+p + geom_vline(xintercept = 1, linetype = "solid", color = "red", size = 1)
 ```
+
 
 
 #Prueba de homocedasticidad ****** (se quita el efecto del bloque con los residuales)
@@ -156,15 +156,21 @@ ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 ```
 
 
-
-*NO entendemos potencia con bloques*
 # Potencia
+
+*Necesitamos corrección*
+
+# prueba de potencia
+ 
+Promedios muestrales
 ```{r}
-library(pwr)
-power.anova.test(n= 12, groups = 6, between.var = 32.812, within.var = 0.643)
+medias <- tapply(base_aguacates$oxidación,list(base_aguacates$temp,base_aguacates$semilla),mean)
 ```
 
-
+CMRes
+```{r}
+cmres <- anova(mod1)[4,3]
+```
 
 *Necesitamos corrección*
 
@@ -184,13 +190,13 @@ cmres <- anova(mod1)[4,3]
 
 Variable X:
 ```{r}
-X = factor(rep(1:12,each=4))
+X = factor(rep(1:6,each=2)) # 6 tratamientos, 2 replicas cada uno
 ```
 
 
 Vector de promedios:
 ```{r}
-muj = rep(medias,each=12)
+muj = rep(as.vector(medias),times=4)
 ```
 
 Variable Y original:
@@ -203,15 +209,14 @@ Y1 = rnorm(n,muj,s)
 Variable de bloques:
 ```{r}
 B=factor(rep(1:4,12))
-B
 ```
 
 Vectorde efectos de bloques:
 ```{r}
 vb <- anova(mod1)[3,2]
 sb=sqrt(vb)
-eb=rnorm(6,0,sb) # Revisar
-efb=rep(eb,2) # Revisar
+eb=rnorm(4,0,sb) # Revisar
+efb=rep(eb,12) # Revisar
 ```
 
 VariableYfinal:
@@ -223,48 +228,46 @@ Y=Y1+efb
 
 Función:
 ```{r}
- fun2=function(b,mu,v,vb){
- k=length(mu)
- n=b*k
- X=factor(rep(1:k,each=b))
- muj=rep(mu,each=b)
- s =sqrt(v)
- Y1=rnorm(n,muj,s)
- B=factor(rep(1:b,k))
- sb=sqrt(vb)
- eb=rnorm(b,0,sb)
- efb=rep(eb,k)
- Y=Y1+efb
- mod=aov(Y~X+B )
- p=anova(mod)[1,5]
- return(p)
+fun2=function(b,mu,v,vb){
+k=length(mu)
+n=b*k
+X=factor(rep(1:k,each=b))
+muj=rep(mu,each=b)
+s =sqrt(v)
+Y1=rnorm(n,muj,s)
+B=factor(rep(1:b,each = k))
+sb=sqrt(vb)
+eb=rnorm(b,0,sb)
+efb=rep(eb,times =k)
+Y=Y1+efb
+mod=aov(Y~X+B )
+p=anova(mod)[1,5]
+return(p)
  }
 ```
 
 Potencia:
 ```{r}
- mu=c(7,10) # Quedamaos aqui
- v=6.5
- vb=10
- b=3:20
- h=length(b)
- M=1000
- prob=matrix(nrow=1000,ncol=h)
- for(jin1:h){
- for(iin1:M)prob[i,j]=fun2(b[j],mu,v,vb)
+mu= as.vector(medias)
+v=0.643
+vb=3.222
+b= 2:4
+h= length(b)
+M=1000
+prob=matrix(nrow=1000,ncol=h)
+for(j in 1:h){
+  for(i in 1:M)prob[i,j]=fun2(b[j],mu,v,vb)
+}
+(pot <- apply(prob < 0.05, 2, mean))
 ```
+
+
 
 ```{r}
-(pot=apply(prob<0.05,2,mean))
+plot(b, pot, type = "l", ylab = "Potencia", xlab = "Número de Bloques")
+abline(h = 1, lty = 2)
+abline(v= 17, lty = 2)
 ```
-
-Gráfico:
-```{r}
- plot(b,pot,type="l")
- abline(h=0.9,lty=2)
- abline(v=17,lty=2)
-```
-
 
 Resultados
 *Qué nos falta aparte de potencia*
