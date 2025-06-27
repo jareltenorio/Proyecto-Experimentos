@@ -145,7 +145,7 @@ confint(em1)
 
 ```{r}
 p <- plot(em1$contrasts, xlab= "Estimado") #para la diferencia relevante
-p + geom_vline(xintercept = 1, linetype = "solid", color = "red", size = 1)+
+p + geom_vline(xintercept = 2, linetype = "solid", color = "red", size = 1)+
   labs(main = "Intervalos de Confianza para Contrastes de Temperatura",
        y = "Contrastes",
        xlab = "Diferencia Estimada")
