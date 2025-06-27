@@ -158,7 +158,7 @@ Hay homocedasticidad
 #Prueba de normalidad
 
 ```{r}
-car::qqPlot(mod1$res, main = "Prueba de Normalidad", xlab = "Cuantiles", ylab = "Residuales")
+car::qqPlot(mod1$res, main = "Gráfico de Normalidad", xlab = "Cuantiles", ylab = "Residuales")
 shapiro.test(mod1$res)
 ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 ```
