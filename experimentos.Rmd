@@ -55,12 +55,6 @@ ks.test(mod$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 
 Verificamos que sí hay normalidad tanto con la prueba de ks y con la shapiro
 
-*intervalos de confianza necesario la diferencia relevante*
-```{r}
-TukeyHSD(aov(mod))
-plot(TukeyHSD(aov(mod))) 
-```
-
 
 *Prueba de homocedasticidad*
 
