@@ -48,7 +48,7 @@ $$
 *Prueba de normalidad*
 
 ```{r}
-car::qqPlot(mod$res)
+car::qqPlot(mod$res, xlab = "Cuantiles", ylab = "Residuales", main = "qqPlot de Residuales")
 shapiro.test(mod$res)
 ks.test(mod$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 ```
@@ -58,8 +58,7 @@ Verificamos que sí hay normalidad tanto con la prueba de ks y con la shapiro
 *intervalos de confianza necesario la diferencia relevante*
 ```{r}
 TukeyHSD(aov(mod))
-plot(TukeyHSD(aov(mod)))
-
+plot(TukeyHSD(aov(mod))) 
 ```
 
 
@@ -76,7 +75,11 @@ Sí hay homocedasticidad (no hay corrección)
 ggplot de interacción
 ```{r}
 ggplot(base_aguacates,aes(x=semilla,y=oxidación, group= temp))+
-  stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))
+  stat_summary(fun.y = "mean",geom="line", aes(linetype = temp))+
+  labs(title = "Interacción entre Temperatura y Presencia de Semilla sobre Oxidación",
+       x= "Semilla",
+       y = "Oxidación",
+       linetype = "Temperatura")
 ```
 
 paso a suma nula y modelo
@@ -105,10 +108,19 @@ t1=base_aguacates$oxidación-pre+mean(base_aguacates$oxidación)
 ```
 
 ```{r}
-par(mfrow=c(1,2))
-boxplot(oxidación~temp+semilla,ylim=c(0,6),xlab="temp",ylab="oxidación",data=base_aguacates)
-boxplot(t1~temp+semilla,ylim=c(0,6),xlab="temp",
-ylab="oxidacion centrada",data=base_aguacates)
+par(mfrow = c(1, 2))
+boxplot(oxidación~temp+semilla, 
+        ylim = c(0, 6), 
+        xlab = "Temperatura", 
+        ylab = "Oxidación",
+        main = "Boxplot: Modelo sin Bloques",
+        data = base_aguacates)
+boxplot(t1~temp+semilla, 
+        ylim = c(0, 6), 
+        xlab = "Temperatura", 
+        ylab = "Oxidación", 
+        main = "Boxplot: Modelo con Bloques",
+        data = base_aguacates)
 ```
 
 
@@ -128,14 +140,15 @@ R/ hicimos la prueba del anova con nuestro modelo sin interaccion y llegamos a l
 ```{r}
 #comparaciones múltiples
 em1 <- emmeans(mod1,pairwise~"temp",adjust="tukey")
-em1
 confint(em1)
 ```
 
 ```{r}
-plot(em1$emmeans)
-p <- plot(em1$contrasts) #para la diferencia relevante
-p + geom_vline(xintercept = 2, linetype = "solid", color = "red", size = 1)
+p <- plot(em1$contrasts, xlab= "Estimado") #para la diferencia relevante
+p + geom_vline(xintercept = 1, linetype = "solid", color = "red", size = 1)+
+  labs(main = "Intervalos de Confianza para Contrastes de Temperatura",
+       y = "Contrastes",
+       xlab = "Diferencia Estimada")
 ```
 
 
@@ -151,7 +164,7 @@ Hay homocedasticidad
 #Prueba de normalidad
 
 ```{r}
-car::qqPlot(mod1$res)
+car::qqPlot(mod1$res, main = "Prueba de Normalidad", xlab = "Cuantiles", ylab = "Residuales")
 shapiro.test(mod1$res)
 ks.test(mod1$residuals,"pnorm",mean=0,sd=sd(mod1$residuals))
 ```
@@ -265,7 +278,7 @@ for(j in 1:h){
 
 
 ```{r}
-plot(b, pot, type = "l", ylab = "Potencia", xlab = "Número de Bloques")
+plot(b, pot, type = "l", ylab = "Potencia", xlab = "Número de Bloques", main = "Pruebas de Potencia")
 abline(h = 1, lty = 2)
 abline(v= 17, lty = 2)
 ```
