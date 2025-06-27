@@ -134,6 +134,7 @@ R/ hicimos la prueba del anova con nuestro modelo sin interaccion y llegamos a l
 ```{r}
 #comparaciones múltiples
 em1 <- emmeans(mod1,pairwise~"temp",adjust="tukey")
+em1
 confint(em1)
 ```
 
