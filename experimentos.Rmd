@@ -260,14 +260,14 @@ Potencia:
 mu= as.vector(medias)
 v=0.643
 vb=3.222
-b= 2:4
+b= 2:8
 h= length(b)
 M=1000
 prob=matrix(nrow=1000,ncol=h)
 for(j in 1:h){
   for(i in 1:M)prob[i,j]=fun2(b[j],mu,v,vb)
 }
-(pot <- apply(prob < 0.05, 2, mean))
+(pot <- apply(prob < 0.05, 2, mean)) # Para conseguir una potencia de 0.8 se debe hacer al rededor de 8 bloques
 ```
 
 
