@@ -127,7 +127,6 @@ anova(mod1)
 
 #la varianza entre bloque es de 9,667 (por lo que no hay muchas diferencias de entre bloques)
 ```
-*Qué teníamos que hacer con la temperatura o semilla (no recordamos si era con el que se rechazabao con el que no)*
 
 R/ hicimos la prueba del anova con nuestro modelo sin interaccion y llegamos a la conclusión de que la temperatura sí tiene un efecto sobre el nivel de oxidacion del aguacate, podemos ver en la siguiente parte
 
